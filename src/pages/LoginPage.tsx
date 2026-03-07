@@ -3,7 +3,10 @@ import { TrendingUp, Mail, Lock, User, Sparkles } from 'lucide-react';
 import Header from '../components/Header';
 import ChatBot from '../components/ChatBot';
 import Footer from '../components/Footer';
+<<<<<<< HEAD
 import API from "../services/api";
+=======
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
 
 interface LoginPageProps {
   onNavigate: (page: string) => void;
@@ -45,6 +48,7 @@ export default function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
     return () => observer.disconnect();
   }, []);
 
+<<<<<<< HEAD
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
@@ -75,6 +79,17 @@ export default function LoginPage({ onNavigate, onLogin }: LoginPageProps) {
     alert(error.response?.data?.detail || "Login failed");
   }
 };
+=======
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.email && formData.password && formData.name) {
+      onLogin(formData.role, { 
+        name: formData.name, 
+        email: formData.email 
+      });
+    }
+  };
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
 
   return (
     <div className="min-h-screen bg-[#0A0E1A] relative overflow-hidden">

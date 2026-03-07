@@ -13,7 +13,10 @@
   "dependencies": {
     "@splinetool/react-spline": "^4.1.0",
     "@supabase/supabase-js": "^2.57.4",
+<<<<<<< HEAD
     "axios": "^1.13.6",
+=======
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
     "chart.js": "^4.5.1",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",

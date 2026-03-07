@@ -1,0 +1,5 @@
+MONGODB_URI=mongodb://localhost:27017
+DB_NAME=upfund
+JWT_SECRET=change_me
+ALLOWED_ORIGINS=http://localhost:5173
+

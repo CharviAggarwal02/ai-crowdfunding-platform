@@ -3,7 +3,10 @@ import { TrendingUp, User, Briefcase, Lock, ChevronDown, Sparkles } from 'lucide
 import Header from '../components/Header';
 import ChatBot from '../components/ChatBot';
 import Footer from '../components/Footer';
+<<<<<<< HEAD
 import API from "../services/api";
+=======
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
 
 interface SignupPageProps {
   onNavigate: (page: string) => void;
@@ -60,6 +63,7 @@ export default function SignupPage({ onNavigate, onLogin }: SignupPageProps) {
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
+<<<<<<< HEAD
   e.preventDefault();
 
   setError(null);
@@ -108,6 +112,51 @@ export default function SignupPage({ onNavigate, onLogin }: SignupPageProps) {
     setSubmitting(false);
   }
 };
+=======
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    if (!selectedRole) {
+      setError('Please select a role.');
+      return;
+    }
+
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
+      setError('Please fill all fields.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch('http://localhost:8000/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          role: selectedRole,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.detail || 'Signup failed');
+      }
+      const data = await res.json();
+      setSuccess('Account created successfully. You can now sign in.');
+      
+      // Call onLogin with the selected role after successful signup
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      onLogin(selectedRole as 'investor' | 'entrepreneur' | 'admin', {
+        name: fullName || formData.email,
+        email: formData.email,
+      });
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
 
   return (
     <div className="min-h-screen bg-[#0A0E1A] relative overflow-hidden">

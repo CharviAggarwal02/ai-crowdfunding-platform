@@ -1,6 +1,9 @@
 import { ArrowLeft, Save, Rocket } from 'lucide-react';
 import { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import API from "../services/api"
+=======
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
 
 interface CreateCampaignPageProps {
   onNavigate: (page: string) => void;
@@ -8,6 +11,7 @@ interface CreateCampaignPageProps {
 
 export default function CreateCampaignPage({ onNavigate }: CreateCampaignPageProps) {
   const [scrollY, setScrollY] = useState(0);
+<<<<<<< HEAD
   const [campaign, setCampaign] = useState({
     title: "",
     tagline: "",
@@ -15,6 +19,8 @@ export default function CreateCampaignPage({ onNavigate }: CreateCampaignPagePro
     description: "",
     goal_amount: ""
   })
+=======
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -42,6 +48,7 @@ export default function CreateCampaignPage({ onNavigate }: CreateCampaignPagePro
     return () => observer.disconnect();
   }, []);
 
+<<<<<<< HEAD
     const createCampaign = async () => {
 
     try {
@@ -65,6 +72,8 @@ export default function CreateCampaignPage({ onNavigate }: CreateCampaignPagePro
 
   }
 
+=======
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
   return (
     <div className="min-h-screen bg-[#0A0E1A] relative overflow-hidden">
       {/* Animated background gradients with parallax */}
@@ -124,6 +133,7 @@ export default function CreateCampaignPage({ onNavigate }: CreateCampaignPagePro
 
           <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 delay-200 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 space-y-4 hover:bg-white/10 hover:border-cyan-500/30 transition-all duration-500">
             <div className="font-medium text-white">Project Basics</div>
+<<<<<<< HEAD
                         <input
               value={campaign.title}
               onChange={(e)=>setCampaign({...campaign,title:e.target.value})}
@@ -141,6 +151,11 @@ export default function CreateCampaignPage({ onNavigate }: CreateCampaignPagePro
               onChange={(e) => setCampaign({...campaign, category: e.target.value})}
               className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500/50 outline-none transition-all"
             >
+=======
+            <input className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500/50 outline-none transition-all" placeholder="Campaign Title" />
+            <input className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500/50 outline-none transition-all" placeholder="Short Blurb/Tagline" />
+            <select className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500/50 outline-none transition-all">
+>>>>>>> 72f8142569886c698ad711df7ac4c6c518b8ec75
               <option className="bg-[#0A0E1A]">Technology</option>
               <option className="bg-[#0A0E1A]">Design</option>
               <option className="bg-[#0A0E1A]">Games</option>
