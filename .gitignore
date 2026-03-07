@@ -21,3 +21,10 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+backend/app/ml/model.pkl
+backend/app/ml/dataset/
+.venv/
+__pycache__/
+node_modules/
+.env
