@@ -1,3 +1,6 @@
+# =========================
+# Logs
+# =========================
 logs
 *.log
 npm-debug.log*
@@ -6,25 +9,162 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# =========================
+# Node / React / Vite
+# =========================
+node_modules/
+dist/
+dist-ssr/
+.vite/
 *.local
 
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Virtual Environment
+# =========================
+.venv/
+venv/
+ENV/
+env/
+
+# =========================
+# Machine Learning Models
+# =========================
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.keras
+
+backend/app/ml/model.pkl
+backend/app/ml/models/
+backend/models/
+models/
+
+# =========================
+# Datasets
+# =========================
+backend/app/ml/dataset/
+datasets/
+data/
+*.csv
+*.xlsx
+*.xls
+*.parquet
+
+# Uncomment if you want sample datasets on GitHub
+# !sample_data/
+
+# =========================
+# Databases
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+
+# Keep if you want database schema only
+# !upfund.db
+
+# =========================
+# FastAPI
+# =========================
+.fastapi_cache/
+
+# =========================
+# IDE
+# =========================
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
-.env
 
-backend/app/ml/model.pkl
-backend/app/ml/dataset/
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Temporary Files
+# =========================
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# Coverage Reports
+# =========================
+coverage/
+.coverage
+coverage.xml
+
+# =========================
+# Build Artifacts
+# =========================
+build/
+target/
+out/
+
+# =========================
+# Package Managers
+# =========================
+.pnpm-store/
+.npm/
+.yarn/
+
+*.sqbpro
+
+backend/venv/
 .venv/
-__pycache__/
+venv/
+
 node_modules/
+
+*.db
+*.sqlite
+*.sqlite3
+
+*.pkl
+*.joblib
+
+backend/app/ml/dataset/
+backend/app/ml/models/
+
 .env
+.env.*

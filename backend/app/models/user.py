@@ -1,19 +1,15 @@
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, Literal
+from sqlalchemy import Column, Integer, String
+from ..db import Base
+from sqlalchemy import DateTime
+from sqlalchemy.sql import func
 
-class UserBase(BaseModel):
-    firstName: str = Field(min_length=1)
-    lastName: str = Field(min_length=1)
-    email: EmailStr
-    role: Literal["investor", "startup", "admin"] = "investor"
+class User(Base):
+    __tablename__ = "users"
 
-class UserCreate(UserBase):
-    password: str = Field(min_length=6)
-
-class UserInDB(UserBase):
-    id: Optional[str] = None
-    passwordHash: str
-
-class UserPublic(UserBase):
-    id: str
-
+    id = Column(Integer, primary_key=True, index=True)
+    firstName = Column(String, nullable=False)
+    lastName = Column(String, nullable=False)
+    email = Column(String, unique=True, index=True)
+    role = Column(String, default="investor")
+    passwordHash = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

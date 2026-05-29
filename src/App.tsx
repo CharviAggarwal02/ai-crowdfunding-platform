@@ -1,105 +1,258 @@
-import { useState } from 'react';
-import HomePage from './pages/HomePage';
-import SignupPage from './pages/SignupPage';
-import LoginPage from './pages/LoginPage';
-import StartupBrowsePage from './pages/StartupBrowsePage';
-import StartupDetailsPage from './pages/StartupDetailsPage';
-import InvestorDashboard from './pages/InvestorDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import MarketAnalysisPage from './pages/MarketAnalysisPage';
-import EntrepreneurDashboard from './pages/EntrepreneurDashboard';
-import CreateCampaignPage from './pages/CreateCampaignPage';
-import PerformanceAnalyticsPage from './pages/PerformanceAnalyticsPage';
-import ProjectUpdatesPage from './pages/ProjectUpdatesPage';
+import { useState, useEffect } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
-interface UserProfile {
-  name: string;
-  email: string;
-}
+import { ThemeProvider } from "./context/ThemeContext";
+import HomePage from "./pages/HomePage";
+import SignupPage from "./pages/SignupPage";
+import LoginPage from "./pages/LoginPage";
+import StartupBrowsePage from "./pages/StartupBrowsePage";
+import StartupDetailsPage from "./pages/StartupDetailsPage";
+import InvestorDashboard from "./pages/InvestorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import MarketAnalysisPage from "./pages/MarketAnalysisPage";
+import EntrepreneurDashboard from "./pages/EntrepreneurDashboard";
+import CreateCampaignPage from "./pages/CreateCampaignPage";
+import PerformanceAnalyticsPage from "./pages/PerformanceAnalyticsPage";
+import ProjectUpdatesPage from "./pages/ProjectUpdatesPage";
 
 type Page =
-  | 'home'
-  | 'signup'
-  | 'login'
-  | 'startups'
-  | 'startup-details'
-  | 'investor-dashboard'
-  | 'admin-dashboard'
-  | 'market-analysis'
-  | 'entrepreneur-dashboard'
-  | 'create-campaign'
-  | 'performance-analytics'
-  | 'project-updates';
+  | "home"
+  | "signup"
+  | "login"
+  | "startups"
+  | "startup-details"
+  | "investor-dashboard"
+  | "admin-dashboard"
+  | "market-analysis"
+  | "entrepreneur-dashboard"
+  | "create-campaign"
+  | "performance-analytics"
+  | "project-updates";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'investor' | 'entrepreneur' | 'admin' | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  return (
+    <BrowserRouter>
+      <ThemeProvider>
+        <AppRoutes />
+      </ThemeProvider>
+    </BrowserRouter>
+  );
+}
 
-  const handleNavigation = (page: Page) => {
-    setCurrentPage(page);
+function StartupDetailsRoute({
+  onNavigate,
+  isLoggedIn,
+  userRole,
+  userName,
+  onLogout,
+}: {
+  onNavigate: (page: string, data?: any) => void;
+  isLoggedIn: boolean;
+  userRole: "investor" | "entrepreneur" | "admin" | null;
+  userName: string;
+  onLogout: () => void;
+}) {
+  const { startupId } = useParams();
+  const parsedStartupId = startupId ? Number(startupId) : null;
+
+  return (
+    <StartupDetailsPage
+      startupId={Number.isFinite(parsedStartupId) ? parsedStartupId : null}
+      onNavigate={onNavigate}
+      isLoggedIn={isLoggedIn}
+      userRole={userRole}
+      userName={userName}
+      onLogout={onLogout}
+    />
+  );
+}
+
+function AppRoutes() {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState<
+    "investor" | "entrepreneur" | "admin" | null
+  >(null);
+  const [userName, setUserName] = useState<string>("");
+
+  // Initialize login state from localStorage on mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+
+    if (token && user) {
+      try {
+        const userData = JSON.parse(user);
+        setIsLoggedIn(true);
+        setUserName(userData.firstName || "");
+        setUserRole(userData.role || null);
+      } catch (err) {
+        console.error("Failed to parse user data from localStorage", err);
+      }
+    }
+  }, []);
+
+  // Handle successful login
+  const handleLoginSuccess = (userData: any) => {
+    setIsLoggedIn(true);
+    setUserName(userData.firstName || "");
+    setUserRole(userData.role || null);
   };
 
-  const handleLogin = (role: 'investor' | 'entrepreneur' | 'admin', userData: UserProfile) => {
-    setIsLoggedIn(true);
-    setUserRole(role);
-    setUserProfile(userData);
-    if (role === 'investor') {
-      setCurrentPage('investor-dashboard');
-    } else if (role === 'admin') {
-      setCurrentPage('admin-dashboard');
-    } else {
-      setCurrentPage('entrepreneur-dashboard');
+  // Bridge existing page-key navigation to URL routes.
+  const handleNavigation = (page: string, data?: any) => {
+    if (page === "startup-details") {
+      if (typeof data === "number") {
+        navigate(`/startup-details/${data}`);
+      } else {
+        navigate("/startups");
+      }
+      return;
     }
+
+    const routeMap: Record<Exclude<Page, "startup-details">, string> = {
+      home: "/",
+      signup: "/signup",
+      login: "/login",
+      startups: "/startups",
+      "investor-dashboard": "/investor-dashboard",
+      "admin-dashboard": "/admin-dashboard",
+      "market-analysis": "/market-analysis",
+      "entrepreneur-dashboard": "/entrepreneur-dashboard",
+      "create-campaign": "/create-campaign",
+      "performance-analytics": "/performance-analytics",
+      "project-updates": "/project-updates",
+    };
+
+    const targetPath = routeMap[page as Exclude<Page, "startup-details">];
+    navigate(targetPath ?? "/");
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserRole(null);
-    setUserProfile(null);
-    setCurrentPage('home');
+    setUserName("");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
   };
 
   return (
-    <>
-      {currentPage === 'home' && (
-        <HomePage onNavigate={handleNavigation} />
-      )}
-      {currentPage === 'signup' && (
-        <SignupPage onNavigate={handleNavigation} onLogin={handleLogin} />
-      )}
-      {currentPage === 'login' && (
-        <LoginPage onNavigate={handleNavigation} onLogin={handleLogin} />
-      )}
-      {currentPage === 'startups' && (
-        <StartupBrowsePage onNavigate={handleNavigation} isLoggedIn={isLoggedIn} userRole={userRole} />
-      )}
-      {currentPage === 'startup-details' && (
-        <StartupDetailsPage onNavigate={handleNavigation} isLoggedIn={isLoggedIn} userRole={userRole} />
-      )}
-      {currentPage === 'investor-dashboard' && (
-        <InvestorDashboard onNavigate={handleNavigation} onLogout={handleLogout} userProfile={userProfile || { name: 'Guest User', email: '' }} />
-      )}
-      {currentPage === 'admin-dashboard' && (
-        <AdminDashboard onNavigate={handleNavigation} onLogout={handleLogout} />
-      )}
-      {currentPage === 'market-analysis' && (
-        <MarketAnalysisPage onNavigate={handleNavigation} isLoggedIn={isLoggedIn} />
-      )}
-      {currentPage === 'entrepreneur-dashboard' && (
-        <EntrepreneurDashboard onNavigate={handleNavigation} onLogout={handleLogout} userProfile={userProfile} />
-      )}
-      {currentPage === 'create-campaign' && (
-        <CreateCampaignPage onNavigate={handleNavigation} />
-      )}
-      {currentPage === 'performance-analytics' && (
-        <PerformanceAnalyticsPage onNavigate={handleNavigation} />
-      )}
-      {currentPage === 'project-updates' && (
-        <ProjectUpdatesPage onNavigate={handleNavigation} />
-      )}
-    </>
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <HomePage
+            onNavigate={handleNavigation}
+            isLoggedIn={isLoggedIn}
+            userName={userName}
+            onLogout={handleLogout}
+            userRole={userRole}
+          />
+        }
+      />
+      <Route
+        path="/signup"
+        element={
+          <SignupPage
+            onNavigate={handleNavigation}
+            isLoggedIn={isLoggedIn}
+            userName={userName}
+            onLogout={handleLogout}
+            userRole={userRole}
+          />
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <LoginPage
+            onNavigate={handleNavigation}
+            isLoggedIn={isLoggedIn}
+            userName={userName}
+            onLogout={handleLogout}
+            onLoginSuccess={handleLoginSuccess}
+            userRole={userRole}
+          />
+        }
+      />
+      <Route
+        path="/startups"
+        element={
+          <StartupBrowsePage
+            onNavigate={handleNavigation}
+            isLoggedIn={isLoggedIn}
+            userRole={userRole}
+            userName={userName}
+            onLogout={handleLogout}
+          />
+        }
+      />
+      <Route
+        path="/startup-details/:startupId"
+        element={
+          <StartupDetailsRoute
+            onNavigate={handleNavigation}
+            isLoggedIn={isLoggedIn}
+            userRole={userRole}
+            userName={userName}
+            onLogout={handleLogout}
+          />
+        }
+      />
+      <Route
+        path="/investor-dashboard"
+        element={<InvestorDashboard onNavigate={handleNavigation} />}
+      />
+      <Route
+        path="/admin-dashboard"
+        element={<AdminDashboard onLogout={handleLogout} />}
+      />
+      <Route
+        path="/market-analysis"
+        element={
+          <MarketAnalysisPage
+            onNavigate={handleNavigation}
+            isLoggedIn={isLoggedIn}
+            userName={userName}
+            onLogout={handleLogout}
+            userRole={userRole}
+          />
+        }
+      />
+      <Route
+        path="/entrepreneur-dashboard"
+        element={
+          <EntrepreneurDashboard
+            onNavigate={handleNavigation}
+            onLogout={handleLogout}
+            isLoggedIn={isLoggedIn}
+            userName={userName}
+            userRole={userRole}
+          />
+        }
+      />
+      <Route
+        path="/create-campaign"
+        element={<CreateCampaignPage onNavigate={handleNavigation} />}
+      />
+      <Route
+        path="/performance-analytics"
+        element={<PerformanceAnalyticsPage onNavigate={handleNavigation} />}
+      />
+      <Route
+        path="/project-updates"
+        element={<ProjectUpdatesPage onNavigate={handleNavigation} />}
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

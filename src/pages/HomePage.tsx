@@ -7,9 +7,19 @@ import Footer from '../components/Footer';
 
 interface HomePageProps {
   onNavigate: (page: string) => void;
+  isLoggedIn?: boolean;
+  userName?: string;
+  onLogout?: () => void;
+  userRole?: "investor" | "entrepreneur" | "admin" | null;
 }
 
-export default function HomePage({ onNavigate }: HomePageProps) {
+export default function HomePage({
+  onNavigate,
+  isLoggedIn,
+  userName,
+  onLogout,
+  userRole,
+}: HomePageProps) {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -59,7 +69,13 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
 
-      <Header onNavigate={onNavigate} />
+      <Header
+        onNavigate={onNavigate}
+        isLoggedIn={isLoggedIn}
+        userName={userName}
+        onLogout={onLogout}
+        userRole={userRole}
+      />
 
       <main className="relative">
        {/* Hero Section */}

@@ -1,5 +1,12 @@
 import {
-  Chart,
+  Line as LineChart,
+  Bar as BarChart,
+  Doughnut as DoughnutChart,
+  Pie as PieChart
+} from "react-chartjs-2"
+
+import {
+  Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -8,13 +15,10 @@ import {
   ArcElement,
   Tooltip,
   Legend,
-  Filler,
-  TimeScale
-} from 'chart.js';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
+  Filler
+} from "chart.js"
 
-// Register chart.js components once for the whole app
-Chart.register(
+ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
@@ -23,8 +27,10 @@ Chart.register(
   ArcElement,
   Tooltip,
   Legend,
-  Filler,
-  TimeScale
-);
+  Filler
+)
 
-export { Line, Bar, Doughnut };
+export const Line = LineChart
+export const Bar = BarChart
+export const Doughnut = DoughnutChart
+export const Pie = PieChart

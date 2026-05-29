@@ -1,105 +1,95 @@
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from motor.motor_asyncio import AsyncIOMotorDatabase
-from ..db import get_db
-from ..models.user import UserCreate, UserPublic
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from datetime import datetime, timedelta
 import jwt
-from ..settings import settings
-from bson import ObjectId
 
-router = APIRouter()
-_pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
-_bearer = HTTPBearer(auto_error=False)
+from ..db import get_db
+from ..models.user import User
+from ..schemas.user import UserCreate, UserLogin, UserPublic
+
+SECRET_KEY = "supersecretkey"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+router = APIRouter(prefix="/api/auth", tags=["Auth"])
+
+# ✅ Use Argon2 instead of bcrypt
+pwd = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
-def _create_access_token(payload: dict) -> str:
-    return jwt.encode(payload, settings.JWT_SECRET, algorithm="HS256")
+# ---------------- TOKEN ---------------- #
+
+def create_access_token(user_id: int):
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    payload = {
+        "sub": str(user_id),
+        "exp": expire
+    }
+
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-async def _get_current_user(
-    creds: HTTPAuthorizationCredentials | None = Depends(_bearer),
-    db: AsyncIOMotorDatabase = Depends(get_db),
-):
-    if creds is None:
-        raise HTTPException(status_code=401, detail="Missing credentials")
-    try:
-        data = jwt.decode(creds.credentials, settings.JWT_SECRET, algorithms=["HS256"])
-        user_id = data.get("sub")
-        if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid token")
-        doc = await db.users.find_one({"_id": ObjectId(user_id)})
-        if not doc:
-            raise HTTPException(status_code=401, detail="User not found")
-        return doc
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+# ---------------- SIGNUP ---------------- #
 
-@router.post("/signup", response_model=UserPublic, status_code=201)
-async def signup(payload: UserCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
-    existing = await db.users.find_one({"email": payload.email.lower()})
-    if existing:
+@router.post("/signup", response_model=UserPublic)
+def signup(payload: UserCreate, db: Session = Depends(get_db)):
+
+    existing_user = db.query(User).filter(User.email == payload.email).first()
+
+    if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    password_hash = _pwd.hash(payload.password)
-    doc = {
-        "firstName": payload.firstName.strip(),
-        "lastName": payload.lastName.strip(),
-        "email": payload.email.lower(),
-        "role": payload.role,
-        "passwordHash": password_hash,
-    }
-    result = await db.users.insert_one(doc)
-    return UserPublic(id=str(result.inserted_id), firstName=doc["firstName"], lastName=doc["lastName"], email=doc["email"], role=doc["role"])
+    password = payload.password.strip()
+
+    # Optional password validation
+    if len(password) < 6:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 6 characters"
+        )
+
+    hashed_password = pwd.hash(password)
+
+    new_user = User(
+        firstName=payload.firstName,
+        lastName=payload.lastName,
+        email=payload.email,
+        passwordHash=hashed_password,
+        role=payload.role,
+        created_at=datetime.utcnow()
+    )
+
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    return new_user
 
 
-class LoginPayload(UserCreate.model_construct().__class__):  # lightweight type reuse: only email/password
-    # Build a minimal Pydantic model with just email/password while keeping validation constraints
-    email: str  # will still be validated by route body using pydantic on parse
-    password: str
-
+# ---------------- LOGIN ---------------- #
 
 @router.post("/login")
-async def login(payload: dict, db: AsyncIOMotorDatabase = Depends(get_db)):
-    # Expecting { email, password }
-    email = str(payload.get("email", "")).lower()
-    password = str(payload.get("password", ""))
-    if not email or not password:
-        raise HTTPException(status_code=422, detail="Email and password are required")
+def login(payload: UserLogin, db: Session = Depends(get_db)):
 
-    user = await db.users.find_one({"email": email})
-    if not user or not _pwd.verify(password, user.get("passwordHash", "")):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    user = db.query(User).filter(User.email == payload.email).first()
 
-    token = _create_access_token({"sub": str(user.get("_id")), "role": user.get("role", "investor")})
-    public = UserPublic(
-        id=str(user.get("_id")),
-        firstName=user.get("firstName", ""),
-        lastName=user.get("lastName", ""),
-        email=user.get("email", ""),
-        role=user.get("role", "investor"),
-    )
-    return {"accessToken": token, "user": public}
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email")
 
+    if not pwd.verify(payload.password.strip(), user.passwordHash):
+        raise HTTPException(status_code=401, detail="Invalid password")
 
-@router.get("/me", response_model=UserPublic)
-async def me(current=Depends(_get_current_user)):
-    return UserPublic(
-        id=str(current.get("_id")),
-        firstName=current.get("firstName", ""),
-        lastName=current.get("lastName", ""),
-        email=current.get("email", ""),
-        role=current.get("role", "investor"),
-    )
+    token = create_access_token(user.id)
 
-
-@router.get("/users")
-async def list_users(current=Depends(_get_current_user), db: AsyncIOMotorDatabase = Depends(get_db)):
-    if current.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Admins only")
-    users = []
-    async for u in db.users.find({}, {"passwordHash": 0}):
-        u["id"] = str(u.pop("_id"))
-        users.append(u)
-    return {"items": users}
-
+    return {
+        "accessToken": token,
+        "user": {
+            "id": user.id,
+            "firstName": user.firstName,
+            "lastName": user.lastName,
+            "email": user.email,
+            "role": user.role
+        }
+    }

@@ -1,140 +1,193 @@
-import { ArrowLeft, Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowLeft, Plus, Trash2, Loader2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import API from "../services/api"
 
-interface ProjectUpdatesPageProps {
-  onNavigate: (page: string) => void;
+interface Props {
+  onNavigate: (page: string) => void
+  campaignId?: number
 }
 
-export default function ProjectUpdatesPage({ onNavigate }: ProjectUpdatesPageProps) {
-  const [scrollY, setScrollY] = useState(0);
+export default function ProjectUpdatesPage({ onNavigate, campaignId }: Props) {
 
+  const [updates, setUpdates] = useState<any[]>([])
+  const [title, setTitle] = useState("")
+  const [content, setContent] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [posting, setPosting] = useState(false)
+  const [error, setError] = useState("")
+
+  // ⭐ FETCH UPDATES
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    if (!campaignId) return
+    fetchUpdates()
+  }, [campaignId])
 
-  // Intersection Observer for scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -100px 0px' }
-    );
+  const fetchUpdates = async () => {
+    try {
+      setLoading(true)
+      const res = await API.get(`/updates/${campaignId}`)
+      setUpdates(res.data || [])
+    } catch (err) {
+      console.log(err)
+      setError("Failed to load updates")
+    } finally {
+      setLoading(false)
+    }
+  }
 
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-      observer.observe(el);
-    });
+  // ⭐ POST UPDATE
+  const postUpdate = async () => {
 
-    return () => observer.disconnect();
-  }, []);
+    if (!title.trim() || !content.trim()) {
+      alert("Please fill all fields")
+      return
+    }
+
+    try {
+      setPosting(true)
+
+      await API.post("/updates/", {
+        campaign_id: campaignId,
+        title,
+        content
+      })
+
+      setTitle("")
+      setContent("")
+
+      await fetchUpdates()
+
+      alert("✅ Update posted successfully")
+
+    } catch (err) {
+      console.log(err)
+      alert("Failed to post update")
+    } finally {
+      setPosting(false)
+    }
+  }
+
+  // ⭐ DELETE UPDATE
+  const deleteUpdate = async (id: number) => {
+
+    if (!window.confirm("Delete this update?")) return
+
+    try {
+      await API.delete(`/updates/${id}`)
+      fetchUpdates()
+    } catch {
+      alert("Delete failed")
+    }
+  }
+
+  // ⭐ NO CAMPAIGN SELECTED UI
+  if (!campaignId) {
+    return (
+      <div className="min-h-screen bg-[#0A0E1A] flex items-center justify-center text-white">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-3">No Campaign Selected</h2>
+          <button
+            onClick={() => onNavigate("entrepreneur-dashboard")}
+            className="px-5 py-2 bg-blue-600 rounded-lg">
+            Go Back
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-[#0A0E1A] relative overflow-hidden">
-      {/* Animated background gradients with parallax */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div 
-          className="absolute top-0 -left-4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"
-          style={{ transform: `translateY(${scrollY * 0.5}px)` }}
-        ></div>
-        <div 
-          className="absolute top-0 -right-4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
-          style={{ transform: `translateY(${scrollY * 0.3}px)` }}
-        ></div>
-        <div 
-          className="absolute -bottom-8 left-20 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"
-          style={{ transform: `translateY(${scrollY * 0.4}px)` }}
-        ></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-[#0A0E1A] via-[#0F172A] to-black text-white">
 
-      {/* Grid pattern overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]"></div>
-
-      <header className="border-b border-white/10 relative z-10 backdrop-blur-xl bg-[#0A0E1A]/80">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <button onClick={() => onNavigate('entrepreneur-dashboard')} className="flex items-center gap-2 text-sm opacity-80 hover:opacity-100">
-            <ArrowLeft className="w-4 h-4" /> Back
+      {/* HEADER */}
+      <header className="border-b border-white/10 bg-[#0A0E1A]/70 backdrop-blur-xl">
+        <div className="max-w-5xl mx-auto flex justify-between items-center p-4">
+          <button onClick={() => onNavigate("entrepreneur-dashboard")}>
+            <ArrowLeft />
           </button>
-          <div className="font-semibold">Project Updates</div>
-          <button className="px-3 py-2 rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-sm flex items-center gap-2 text-white shadow-lg shadow-blue-500/25 transition-all">
-            <Plus className="w-4 h-4" /> Post New Update
-          </button>
+          <h1 className="font-semibold text-lg">Project Updates</h1>
+          <div />
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-        <section className="lg:col-span-2 space-y-4">
-          {[1, 2].map((i) => (
-            <article key={i} className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 delay-100 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:bg-white/10 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-500">
-              <h3 className="font-semibold mb-2 text-white">Update Title {i}</h3>
-              <p className="text-gray-300 text-sm">Short summary of your update. Share progress, milestones, or manufacturing status.</p>
-              <div className="mt-3 text-xs text-gray-500">12k views • 182 comments</div>
-            </article>
-          ))}
+      <main className="max-w-5xl mx-auto p-6 space-y-6">
 
-          <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 delay-200 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-6 hover:bg-white/10 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-500">
-            <div className="font-semibold mb-4 text-white">Q&A from Backers</div>
-            {[1, 2].map((q) => (
-              <div key={q} className="border-t border-white/10 py-3 first:border-t-0">
-                <div className="text-sm text-gray-300">Sample question {q}?</div>
-                <button className="mt-2 text-xs px-2 py-1 rounded bg-white/10 hover:bg-white/15 border border-white/10 text-white transition-all">Answer</button>
-              </div>
-            ))}
-          </div>
-        </section>
+        {/* POST UPDATE CARD */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-xl space-y-4">
+          <h2 className="text-lg font-semibold">Post New Update</h2>
 
-        <aside className="space-y-4">
-          <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 delay-300 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-4 hover:bg-white/10 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-500">
-            <div className="font-medium mb-2 text-white">Quick Stats</div>
-            <div className="text-sm text-gray-300">Unread Messages: 3</div>
-            <div className="text-sm text-gray-300">New Questions: 5</div>
-            <div className="text-sm text-gray-300">Total Backers: 1,482</div>
-          </div>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Update title"
+            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-cyan-400"
+          />
 
-          <div className="animate-on-scroll opacity-0 translate-y-4 transition-all duration-700 delay-400 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-4 hover:bg-white/10 hover:border-cyan-500/30 hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-500">
-            <div className="font-medium mb-2 text-white">Response Templates</div>
-            <ul className="text-sm text-gray-300 space-y-1">
-              <li>Shipping Address Confirmation</li>
-              <li>Thank You Note</li>
-              <li>Feature Request Response</li>
-            </ul>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Write your update..."
+            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 min-h-[120px] outline-none focus:border-cyan-400"
+          />
+
+          <button
+            onClick={postUpdate}
+            disabled={posting}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl flex items-center gap-2 hover:scale-105 transition">
+
+            {posting ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18} />}
+            {posting ? "Posting..." : "Post Update"}
+
+          </button>
+        </div>
+
+        {/* ERROR */}
+        {error && (
+          <div className="text-red-400 text-center">{error}</div>
+        )}
+
+        {/* LOADING */}
+        {loading && (
+          <div className="text-center text-gray-400 py-10">
+            Loading updates...
           </div>
-        </aside>
+        )}
+
+        {/* EMPTY */}
+        {!loading && updates.length === 0 && (
+          <div className="text-center text-gray-400 py-10">
+            No updates yet 🚀
+          </div>
+        )}
+
+        {/* UPDATE LIST */}
+        {!loading && updates.map((u) => (
+          <div
+            key={u.id}
+            className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-cyan-400/40 transition">
+
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-lg">{u.title}</h3>
+
+              <button
+                onClick={() => deleteUpdate(u.id)}
+                className="text-red-400 hover:text-red-500">
+                <Trash2 size={18} />
+              </button>
+            </div>
+
+            <p className="text-gray-300 mt-3 leading-relaxed">
+              {u.content}
+            </p>
+
+            <div className="text-xs text-gray-500 mt-4">
+              {new Date(u.created_at).toLocaleString()}
+            </div>
+
+          </div>
+        ))}
+
       </main>
-
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-
-        .animate-in {
-          opacity: 1 !important;
-          transform: translateY(0) scale(1) !important;
-        }
-
-        html {
-          scroll-behavior: smooth;
-        }
-      `}</style>
     </div>
-  );
+  )
 }

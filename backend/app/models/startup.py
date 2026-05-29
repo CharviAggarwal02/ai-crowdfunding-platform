@@ -1,17 +1,19 @@
-from sqlalchemy import Column,Integer,String,Float,ForeignKey,DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String, Float
 from app.db import Base
 
 class Startup(Base):
+    __tablename__ = "startups"
 
-    __tablename__="startups"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    description = Column(String)
+    industry = Column(String)
+    status = Column(String)
 
-    id=Column(Integer,primary_key=True)
-    name=Column(String)
-    category=Column(String)
-    goal_amount=Column(Float)
-    description=Column(String)
+    fundingGoal = Column("funding_goal", Float, default=0)
+    currentFunding = Column("current_funding", Float, default=0)
 
-    owner_id=Column(Integer,ForeignKey("users.id"))
-
-    created_at=Column(DateTime,server_default=func.now())
+    valuation = Column(Float)
+    teamSize = Column("team_size", Integer)
+    equity = Column(Float)
+    foundedDate = Column("founded_date", String)
