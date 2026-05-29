@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
 
-from .routes import auth, investment, analytics, prediction
+from .routes import auth, investment, analytics
 from .routes import startups
 from .routes import campaign
 from .routes import admin
