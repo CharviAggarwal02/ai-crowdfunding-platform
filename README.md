@@ -185,15 +185,15 @@ https://crowdfunding-platform-3.onrender.com/docs
 ---
 
 ## 📸 Screenshots
+<img width="1917" height="911" alt="image" src="https://github.com/user-attachments/assets/e9f7e765-0671-4c03-a09d-c72cd8d439d4" />
+<img width="1917" height="910" alt="image" src="https://github.com/user-attachments/assets/3e025111-c8d2-4e6f-8c74-ce4dc1260e75" />
+<img width="1917" height="912" alt="image" src="https://github.com/user-attachments/assets/016e1bff-9e1a-42c0-af06-59a6ecee1529" />
+<img width="1917" height="905" alt="image" src="https://github.com/user-attachments/assets/c06ef729-5c3b-4238-b091-361075a31c64" />
+<img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/dbfc54a1-9520-4cfb-9828-414ee1b21066" />
 
-Add screenshots here:
 
-* Home Page
-* Startup Browse Page
-* Startup Details Page
-* Investor Dashboard
-* Entrepreneur Dashboard
-* Analytics Dashboard
+# Demo Video
+
 
 ---
 
@@ -218,7 +218,7 @@ GitHub: https://github.com/CharviAggarwal02
 
 LinkedIn: https://www.linkedin.com/in/charvi-aggarwal03/
 
-Portfolio: https://charviaggarwal02.github.io/CHARVI-portfolio/
+Portfolio: https://charvi-portfolio-v2.vercel.app/
 
 ---
 
