@@ -2,6 +2,14 @@
 
 UpFund is a modern crowdfunding platform that connects entrepreneurs and investors through an intuitive web application. The platform enables startups to publish funding campaigns, investors to discover promising ventures, and both parties to communicate seamlessly.
 
+# Problem Statement
+Startups often struggle to discover investors,
+while investors face challenges identifying promising ventures.
+
+This platform bridges that gap using AI-driven project insights,
+secure authentication,
+and an intuitive crowdfunding workflow.
+
 ## 🌟 Features
 
 ### 👨‍💼 Entrepreneur Features
