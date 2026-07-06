@@ -19,13 +19,13 @@
 
 ### 🌐 Live Links
 
-🚀 **Frontend:** YOUR_FRONTEND_URL
+🚀 **Frontend:** https://crowdfunding-platform-puce.vercel.app
 
 ⚡ **Backend API:** https://crowdfunding-platform-3.onrender.com
 
 📚 **API Documentation:** https://crowdfunding-platform-3.onrender.com/docs
 
-🎥 **Demo Video:** YOUR_YOUTUBE_DEMO
+🎥 **Demo Video:** https://drive.google.com/file/d/1p8FGVZEJnGkGKdxZi8dMwi0JlZILDMnE/view?usp=sharing
 
 🌐 **Portfolio:** https://charvi-portfolio-v2.vercel.app/
 
